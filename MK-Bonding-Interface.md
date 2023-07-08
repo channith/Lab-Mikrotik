@@ -26,11 +26,11 @@ interface Eth-Trunk15
  mode lacp
 #
 interface GigabitEthernet0/0/6
- description TO~MK-R1~sfp1~ODF-MBT-06~Core38
+ description TO~MK-R1~sfp1
  eth-trunk 15
 #
 interface GigabitEthernet0/0/7
- description TO~MK-R1~sfp2~ODF-MBT-06~Core38
+ description TO~MK-R1~sfp2
  eth-trunk 15
 #
 ```

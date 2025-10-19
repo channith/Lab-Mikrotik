@@ -33,6 +33,54 @@ repeat new password> mkr01
 [admin@MikroTik] > ip/address/add interface=VLAN10 address=10.200.10.2/24
 ```
 
+#### IPsec VPN
+
+- IPsec Profile
+First, create the IPsec Profile, where the IKE proposal is defined.
+
+```
+[admin@MikroTik] > ip/ipsec/profile/add name=VPN10 hash-algorithm=sha256 enc-algorithm=aes-
+256 dh-group=ecp521 proposal-check=obey
+```
+
+- IPsec Proposal
+In the next step, create a new IPsec Proposal for phase 2 encryption.
+No Auth. Algorithms are needed since used AES-256-GCM as the encryption algorithm, which already includes the authentication.
+```
+[admin@MikroTik] > ip/ipsec/proposal/add name=VPN10 enc-algorithms=aes-256-gcm pfs-group=ec
+p521
+```
+
+- IPsec Peer
+For the peer configuration, set the name, IP address, IPsec profile, and Exchange Mode to IKEv2.
+```
+[admin@MikroTik] > ip/ipsec/peer/add name=VPN10 address=10.200.10.2 profile=VPN10 exchange-
+mode=ike2 send-initial-contact=yes
+```
+
+- IPsec Identity
+To set the authentication method using a pre-shared key, add a new IPsec Identity.
+```
+[admin@MikroTik] > ip/ipsec/identity/add peer=VPN10 secret=oursecret
+```
+
+- IPsec Policy
+Next, define which networks will communicate with each other through the VPN tunnel.
+```
+[admin@MikroTik] > ip/ipsec/policy/add peer=VPN10 tunnel=yes proposal=VPN10 src-address=192
+.168.10.0/24 dst-address=192.168.20.0/24 action=encrypt ipsec-protocols=esp 
+```
+
+
+- NAT
+```
+[admin@MikroTik] > ip/firewall/nat/add chain=srcnat src-address=192.168.10.0/24 dst-address
+=192.168.20.0/24 action=accept 
+```
+
+- Route
+> [admin@MikroTik] > ip/route/add dst-address=192.168.20.0/24 gateway=10.200.10.2
+
 ### MK-R02
 - User
 
@@ -63,6 +111,49 @@ repeat new password> mkr02
 ```
 [admin@MikroTik] > ip/address/add interface=VLAN10 address=10.200.10.2/24
 ```
+
+#### IPsec VPN
+
+- IPsec Profile
+First, create the IPsec Profile, where the IKE proposal is defined.
+
+```
+[admin@MikroTik] > ip/ipsec/profile/add name=VPN10 hash-algorithm=sha256 enc-algorithm=aes-256 dh-group=ecp521 proposal-check=obey
+```
+
+- IPsec Proposal
+In the next step, create a new IPsec Proposal for phase 2 encryption.
+No Auth. Algorithms are needed since used AES-256-GCM as the encryption algorithm, which already includes the authentication.
+```
+[admin@MikroTik] > ip/ipsec/proposal/add name=VPN10 enc-algorithms=aes-256-gcm pfs-group=ecp521
+```
+
+- IPsec Peer
+For the peer configuration, set the name, IP address, IPsec profile, and Exchange Mode to IKEv2.
+```
+[admin@MikroTik] > ip/ipsec/peer/add name=VPN10 address=10.200.10.1 profile=VPN10 exchange-mode=ike2 send-initial-contact=yes
+```
+
+- IPsec Identity
+To set the authentication method using a pre-shared key, add a new IPsec Identity.
+```
+[admin@MikroTik] > ip/ipsec/identity/add peer=VPN10 secret=oursecret
+```
+
+- IPsec Policy
+Next, define which networks will communicate with each other through the VPN tunnel.
+```
+[admin@MikroTik] > ip/ipsec/policy/add peer=VPN10 tunnel=yes proposal=VPN10 src-address=192.168.20.0/24 dst-address=192.168.10.0/24 action=encrypt ipsec-protocols=esp 
+```
+
+- NAT
+```
+[admin@MikroTik] > ip/firewall/nat/add chain=srcnat src-address=192.168.20.0/24 dst-address=192.168.10.0/24 action=accept 
+```
+
+- Route
+> [admin@MikroTik] > ip/route/add dst-address=192.168.10.0/24 gateway=10.200.10.1
+
 
 ### SW01
 
